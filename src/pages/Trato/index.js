@@ -5,6 +5,7 @@ import api from "../../services/api";
 import { LinearProgress, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Button, Grid, Divider, Typography, ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails } from '@material-ui/core';
 import textLabels from '../textLabels';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { getToken } from "../../services/auth";
 
 const styles = theme => ({
     fab: {
@@ -98,12 +99,14 @@ class Trato extends Component {
             },
             rowData: {},
             treatment: {},
+            token: ''
         }
     }
 
     componentDidMount = async () => {
         try {
-            const response = await api.get("/api/confinement/");
+            const token = await getToken();
+            const response = await api.get("/api/confinement/", { headers: {'x-access-token': token} });
             if (response.data.success && response.data.data !== null) {
                 this.setState({ data: response.data.data });
             }
@@ -115,8 +118,8 @@ class Trato extends Component {
     } 
 
     onRowClick = async (rowData) => {
-
-        const response = await api.get("/api/confinement/treatment/"+rowData[0]); 
+        const token = await getToken();
+        const response = await api.get("/api/confinement/treatment/"+rowData[0], { headers: {'x-access-token': token} }); 
 
         if (response.data.success && response.data.data !== null) {
             this.setState({ treatment: response.data.data });

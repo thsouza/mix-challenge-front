@@ -7,6 +7,7 @@ import textLabels from '../textLabels';
 import AddIcon from '@material-ui/icons/Add';
 import _ from 'lodash';
 import { getUserId } from '../../services/auth';
+import { getToken } from "../../services/auth";
 
 const styles = theme => ({
     fab: {
@@ -118,7 +119,8 @@ class Confinamento extends Component {
 
     getData = async () => {
         try {
-            const response = await api.get("/api/confinement/");
+            const token = await getToken();
+            const response = await api.get("/api/confinement/", { headers: {'x-access-token': token} });
             if (response.data.success && response.data.data !== null) {
                 this.setState({ data: response.data.data });
             }
@@ -129,11 +131,12 @@ class Confinamento extends Component {
         }
     }
 
-    onRowsDeleted = (rowsDeleted) => {
+    onRowsDeleted = async (rowsDeleted) => {
         try {
             const { data } = this.state;
+            const token = await getToken();
             rowsDeleted.data.forEach(element => {
-                api.delete("/api/confinement/"+data[element.index]._id);
+                api.delete("/api/confinement/"+data[element.index]._id, { headers: {'x-access-token': token} });
             });
         } catch (err) {
             console.log(err);
@@ -165,8 +168,9 @@ class Confinamento extends Component {
         this.setState({ rowData: _.set({...this.state.rowData}, event.target.name, event.target.value) });
     }
 
-    addConfinement = (userId, rowData) => {
-        api.post("/api/confinement/"+userId, rowData).then(response => { 
+    addConfinement = async (userId, rowData) => {
+        const token = await getToken();
+        api.post("/api/confinement/"+userId, rowData, { headers: {'x-access-token': token} }).then(response => { 
             if (response.data.success) {
                 this.getData();
                 this.handleClose();
@@ -177,8 +181,9 @@ class Confinamento extends Component {
         });
     }
 
-    updateConfinement = (rowData) => {
-        api.put("/api/confinement/"+rowData._id, rowData).then(response => { 
+    updateConfinement = async (rowData) => {
+        const token = await getToken();
+        api.put("/api/confinement/"+rowData._id, rowData, { headers: {'x-access-token': token} }).then(response => { 
             if (response.data.success) {
                 this.getData();
                 this.handleClose();
